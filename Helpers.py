@@ -4,7 +4,7 @@ import numpy as np
 def SphPosToCart(vector, radians=False):
     """Convert a spherical position vector into Cartesian position.
 
-    Argument_grid:
+    Arguments:
         vector -- A 3-element NumPy array representing, in order,
                   the spherical r, theta, and phi position coordinates.
 
@@ -24,7 +24,7 @@ def SphPosToCart(vector, radians=False):
 def CartPosToSph(vector):
     """Convert a Cartesian position vector into spherical coordinate space.
 
-    Argument_grid:
+    Arguments:
         vector -- A 3-element NumPy array representing, in order,
                   Cartesian x, y, and z position coordinates.
 
@@ -42,11 +42,11 @@ def CartPosToSph(vector):
 def SphVecToCart(position, vector, radians=False):
     """Convert a spherical vector into Cartesian vector space.
 
-    Takes a spherical-space vector and it_grid corresponding spherical-
+    Takes a spherical-space vector and its corresponding spherical-
     space position and returns the magnitude of the vector in x, y,
     and z Cartesian directions.
 
-    Argument_grid:
+    Arguments:
         position -- A 3-element NumPy array, representing the position
                     of the vector in spherical space.
         vector -- A 3-element NumPy array, representing the vector to
