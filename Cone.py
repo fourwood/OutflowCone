@@ -5,7 +5,6 @@ import numpy as np
 class Cone:
     """ Galactic wind outflow cone model.
     """
-
     def __init__(self, inc=0, PA=0, theta=60, r_in=0.0, r_out=5.0):
         """ Create a new outflow cone.
             
@@ -64,6 +63,12 @@ class Cone:
         cart_pts = np.array([SphPosToCart(sph_pt, radians=True) for
                     sph_pt in self._sph_pts])
 
+        # Coord system will be:
+        #   -Z-axis is LOS, making X go right and Y go up (+Z out of the page)
+        # Rot in -X for inc (or rotate -inc in +X) and in Z for PA
+        self.positions = np.asarray([Rot(pt, x=-self.inc, z=self.PA) \
+                            for pt in cart_pts])
+
     # Properties for nicely slicing the 2D array of coordinates into lists of each
     # of your normal spherical coordinates.
     @property
@@ -77,6 +82,18 @@ class Cone:
     @property
     def _phis(self):
         return self._sph_pts[:,2]
+
+    @property
+    def _xs(self):
+        return self.positions[:,0]
+
+    @property
+    def _ys(self):
+        return self.positions[:,1]
+
+    @property
+    def _zs(self):
+        return self.positions[:,2]
 
 if __name__ == "__main__":
     pass

@@ -79,7 +79,7 @@ def SphVecToCart(position, vector, radians=False):
     transform_matrix = np.array([r_hat, theta_hat, phi_hat])
     return vector.dot(transform_matrix)
 
-def RotX(vector, angle):
+def RotX(vector, angle, radians=False):
     """Rotate a Cartesian vector by a given angle about the +x axis.
 
     This function rotates a given vector about the Cartesian +x axis.
@@ -92,13 +92,15 @@ def RotX(vector, angle):
 
     Returns a 3-element NumPy array representing the rotated vector.
     """
-    angle = np.radians(angle)
+    if not radians:
+        angle = np.radians(angle % 360)
+
     R_X = np.array([[1,             0,              0],
                     [0, np.cos(angle), -np.sin(angle)],
                     [0, np.sin(angle),  np.cos(angle)]])
     return R_X.dot(vector)
 
-def RotY(vector, angle):
+def RotY(vector, angle, radians=False):
     """Rotate a Cartesian vector by a given angle about the +y axis.
 
     This function rotates a given vector about the Cartesian +y axis.
@@ -109,15 +111,20 @@ def RotY(vector, angle):
         vector -- A 3-element NumPy array to be rotated.
         angle -- The angle by which the input vector will be rotated.
 
+    Keywords:
+        radians -- Whether 'angle' is in radians (True) or degrees (False; default).
+
     Returns a 3-element NumPy array representing the rotated vector.
     """
-    angle = np.radians(angle)
+    if not radians:
+        angle = np.radians(angle % 360)
+
     R_Y = np.array([[ np.cos(angle), 0, np.sin(angle)],
                     [             0, 1,             0],
                     [-np.sin(angle), 0, np.cos(angle)]])
     return R_Y.dot(vector)
 
-def RotZ(vector, angle):
+def RotZ(vector, angle, radians=False):
     """Rotate a Cartesian vector by a given angle about the +z axis.
 
     This function rotates a given vector about the Cartesian +z axis.
@@ -128,15 +135,20 @@ def RotZ(vector, angle):
         vector -- A 3-element NumPy array to be rotated.
         angle -- The angle by which the input vector will be rotated.
 
+    Keywords:
+        radians -- Whether 'angle' is in radians (True) or degrees (False; default).
+
     Returns a 3-element NumPy array representing the rotated vector.
     """
-    angle = np.radians(angle)
+    if not radians:
+        angle = np.radians(angle % 360)
+
     R_Z = np.array([[ np.cos(angle), -np.sin(angle), 0],
                     [ np.sin(angle),  np.cos(angle), 0],
                     [             0,              0, 1]])
     return R_Z.dot(vector)
 
-def Rot(vector, x=0., y=0., z=0., radians=True):
+def Rot(vector, x=0., y=0., z=0., radians=False):
     """Rotate a Cartesian vector.
 
     This function rotates a given vector about the Cartesian axes.
@@ -147,18 +159,30 @@ def Rot(vector, x=0., y=0., z=0., radians=True):
         vector -- A 3-element NumPy array to be rotated.
         angle -- The angle by which the input vector will be rotated.
 
+    Keywords:
+        radians -- Whether 'angle' is in radians (True) or degrees (False; default).
+
     Returns a 3-element NumPy array representing the rotated vector.
     """
-    R_X = np.array([[1,             0,              0],
-                    [0, np.cos(angle), -np.sin(angle)],
-                    [0, np.sin(angle),  np.cos(angle)]])
-    R_Y = np.array([[ np.cos(angle), 0, np.sin(angle)],
-                    [             0, 1,             0],
-                    [-np.sin(angle), 0, np.cos(angle)]])
-    R_Z = np.array([[ np.cos(angle), -np.sin(angle), 0],
-                    [ np.sin(angle),  np.cos(angle), 0],
-                    [             0,              0, 1]])
-    return vector
+    if not radians:
+        x = np.radians(x % 360)
+        y = np.radians(y % 360)
+        z = np.radians(z % 360)
+
+    R_X = np.matrix([[         1,         0,           0],
+                     [         0,  np.cos(x), -np.sin(x)],
+                     [         0,  np.sin(x),  np.cos(x)]])
+
+    R_Y = np.matrix([[ np.cos(y),          0,  np.sin(y)],
+                     [         0,          1,          0],
+                     [-np.sin(y),          0,  np.cos(y)]])
+
+    R_Z = np.matrix([[ np.cos(z), -np.sin(z),          0],
+                     [ np.sin(z),  np.cos(z),          0],
+                     [         0,          0,          1]])
+
+    R = R_Z * R_Y * R_X
+    return R.dot(vector).A1 # Return result as flattened array.
 
 def CylPosToCart(vector):
     """Convert a cylindrical position vector into Cartesian position.
