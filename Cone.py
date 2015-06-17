@@ -25,7 +25,7 @@ class Cone:
 
         self.positions = None
 
-    def GenerateClouds(self, n, bicone=False, falloff=1):
+    def GenerateClouds(self, n, bicone=False, falloff=1, zero_z=False):
         """ Generate 'n' model clouds within the cone bounds.
 
             Arguments:
@@ -36,6 +36,8 @@ class Cone:
                 falloff --  Radial density distribution exponent. Default is 1 for
                             a mass-conserving outflow (density goes as r^-2).
                             A value of 1/3 creates a constant-density profile.
+                zero_z  --  r_in makes the z-height of the base of the cone non-zero.
+                            Should the clouds all get translated down? (e.g. z -= r_in)
 
             Returns:
                 None. Creates "positions" member variable, containing Cartesian
@@ -70,12 +72,33 @@ class Cone:
         self._cart_pts = np.array([SphPosToCart(sph_pt, radians=True) for
                     sph_pt in self._sph_pts])
 
+        if zero_z:
+            self._cart_pts[:,2] -= self.r_in * np.cos(theta_rad)
+
         # Coord system will be:
         #   -Z-axis is LOS, making X go right and Y go up (+Z out of the page)
         # Rot in -X for inc (or rotate -inc in +X) and in Z for PA
         self.positions = np.asarray([Rot(pt, x=-self.inc, z=self.PA) \
                             for pt in self._cart_pts])
         self.velocities = np.zeros_like(self.positions)
+
+    def ProjectVels(self, LOS):
+        """ Projects the 3D Cartesian velocities into the given line-of-sight.
+            NOTE:   UNTESTED!  So far I do a lot of assuming that -z is the LOS,
+                    but maybe this still works okay.
+            NOTE2:  If you just want it projected into a Cartesian axis,
+                    use self._vxs/_vys/_vzs to avoid all the dot products.
+
+            Arguments:
+                LOS --  3-element NumPy array representing the LOS vector.
+                        NOTE: UNTESTED!  So far I do a lot of assuming that
+                        -z is the LOS, but this still probably works okay.
+
+            Returns:
+                NumPy array of length == len(self.velocities), where each value
+                is the velocity vector dotted into the given LOS.
+        """
+        return np.asarray([v.dot(LOS) for v in self.velocities])
 
     # Properties for nicely slicing the 2D array of positions and velocities
     # into lists for each coordinate.
