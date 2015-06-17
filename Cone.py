@@ -48,9 +48,9 @@ class Cone:
         # Even spread in cos(theta) to avoid clustering at poles.
         theta_rad = np.radians(self.theta)
         if bicone:
-            vs_1 = np.random.random(self._n/2.) * \
+            vs1 = np.random.random(self._n/2.) * \
                    (1-np.cos(theta_rad)) + np.cos(theta_rad)
-            vs_2 = -(np.random.random(self._n/2.) * \
+            vs2 = -(np.random.random(self._n/2.) * \
                     (1-np.cos(theta_rad)) + np.cos(theta_rad))
             vs = np.concatenate((vs1, vs2))
         else:
@@ -67,14 +67,14 @@ class Cone:
         self._sph_pts = np.vstack((rs, thetas, phis)).transpose()
 
         # Convert to Cartesian so we can rotate things around.
-        cart_pts = np.array([SphPosToCart(sph_pt, radians=True) for
+        self._cart_pts = np.array([SphPosToCart(sph_pt, radians=True) for
                     sph_pt in self._sph_pts])
 
         # Coord system will be:
         #   -Z-axis is LOS, making X go right and Y go up (+Z out of the page)
         # Rot in -X for inc (or rotate -inc in +X) and in Z for PA
         self.positions = np.asarray([Rot(pt, x=-self.inc, z=self.PA) \
-                            for pt in cart_pts])
+                            for pt in self._cart_pts])
         self.velocities = np.zeros_like(self.positions)
 
     # Properties for nicely slicing the 2D array of positions and velocities
