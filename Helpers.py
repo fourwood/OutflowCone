@@ -148,7 +148,7 @@ def RotZ(vector, angle, radians=False):
                     [             0,              0, 1]])
     return R_Z.dot(vector)
 
-def Rot(vector, x=0., y=0., z=0., radians=False):
+def Rot(vectors, x=0., y=0., z=0., radians=False):
     """Rotate a Cartesian vector.
 
     This function rotates a given vector about the Cartesian axes.
@@ -156,14 +156,23 @@ def Rot(vector, x=0., y=0., z=0., radians=False):
     from the +x axis toward the +y axis.
 
     Arguments:
-        vector -- A 3-element NumPy array to be rotated.
-        angle -- The angle by which the input vector will be rotated.
+        vector -- A NumPy array of vectors to be rotated.
+        angle -- The angle by which the input vectors will be rotated.
 
     Keywords:
         radians -- Whether 'angle' is in radians (True) or degrees (False; default).
 
-    Returns a 3-element NumPy array representing the rotated vector.
+    Returns a NumPy array representing the rotated vectors.
     """
+    if vectors.ndim == 1:
+        if len(vectors) != 3:
+            print("ERROR - Rot(): Vector not a 3-dimensional vector! Aborting.")
+            return
+    elif vectors.ndim > 2:
+        print("ERROR - Rot(): Only handles a list of 3D vectors (2-dimensional array). \
+               Aborting.")
+        return
+
     if not radians:
         x = np.radians(x % 360)
         y = np.radians(y % 360)
@@ -182,7 +191,13 @@ def Rot(vector, x=0., y=0., z=0., radians=False):
                      [         0,          0,          1]])
 
     R = R_Z * R_Y * R_X
-    return R.dot(vector).A1 # Return result as flattened array.
+
+    if vectors.ndim == 1: # A single vector
+        result = R.dot(vectors).A1 # Return result as flattened array.
+    elif vectors.ndim == 2: # A list of vectors
+        result = R.dot(vectors.T).T.A
+
+    return result
 
 def CylPosToCart(vector):
     """Convert a cylindrical position vector into Cartesian position.
