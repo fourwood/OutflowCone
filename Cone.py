@@ -71,8 +71,7 @@ class Cone:
         self._sph_pts = np.vstack((rs, thetas, phis)).transpose()
 
         # Convert to Cartesian so we can rotate things around.
-        self._cart_pts = np.array([oc.SphPosToCart(sph_pt, radians=True) for
-                    sph_pt in self._sph_pts])
+        self._cart_pts = oc.SphPosToCart(self._sph_pts, radians=True)
 
         if zero_z:
             self._cart_pts[:,2] -= self.r_in * np.cos(theta_rad)

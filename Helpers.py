@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 
-def SphPosToCart(vector, radians=False):
+def SphPosToCart(vectors, radians=False):
     """Convert a spherical position vector into Cartesian position.
 
     Arguments:
@@ -11,33 +11,68 @@ def SphPosToCart(vector, radians=False):
     Returns a 3-element NumPy array representing, in order, the
     representative Cartesian x, y, and z coordinates of the input vector.
     """
-    if len(vector) != 3:
-        print("WARNING - SphPosToCart(): Not a 3-dimensional vector!")
-    r, theta, phi = vector
+    if vectors.ndim == 1:
+        if len(vectors) != 3:
+            print("ERROR - SphPosToCart(): Vector not a 3-dimensional vector! Aborting.")
+            return
+    elif vectors.ndim > 2:
+        print("ERROR - SphPosToCart(): Only handles a list of 3D vectors \
+               (2-dimensional array). Aborting.")
+        return
+
+    if vectors.ndim == 1:
+        r, theta, phi = vectors
+    elif vectors.ndim == 2:
+        r = vectors[:,0]
+        theta = vectors[:,1]
+        phi = vectors[:,2]
+
     if not radians:
         theta = np.radians(theta % 360)
         phi = np.radians(phi % 360)
-    return np.array([r * np.sin(theta) * np.cos(phi),
-                     r * np.sin(theta) * np.sin(phi),
-                     r * np.cos(theta)])
 
-def CartPosToSph(vector):
+    result = np.array([r * np.sin(theta) * np.cos(phi),
+                       r * np.sin(theta) * np.sin(phi),
+                       r * np.cos(theta)])
+    return result.T
+
+def CartPosToSph(vectors, radians=False):
     """Convert a Cartesian position vector into spherical coordinate space.
 
     Arguments:
-        vector -- A 3-element NumPy array representing, in order,
+        vectors -- A 3-element NumPy array representing, in order,
                   Cartesian x, y, and z position coordinates.
 
     Returns a 3-element NumPy array representing, in order, the
     spherical r, theta, and phi position coordinates of the input vector.
     """
-    if len(vector) != 3:
-        print("WARNING: Not a 3-dimensional vector!")
-    x, y, z = vector[:3]
+    if vectors.ndim == 1:
+        if len(vectors) != 3:
+            print("ERROR - CartPosToSph(): Vector not a 3-dimensional vector! Aborting.")
+            return
+    elif vectors.ndim > 2:
+        print("ERROR - CartPosToSph(): Only handles a list of 3D vectors \
+               (2-dimensional array). Aborting.")
+        return
 
-    return np.array([np.sqrt(x**2+y**2+z**2),
-                     np.degrees(np.arctan2(np.sqrt(x**2+y**2), z)),
-                     np.degrees(np.arctan2(y, x))])
+    if vectors.ndim == 1:
+        x, y, z = vectors
+    elif vectors.ndim == 2:
+        x = vectors[:,0]
+        y = vectors[:,1]
+        z = vectors[:,2]
+
+    r = np.sqrt(x**2+y**2+z**2)
+    theta = np.arctan2(np.sqrt(x**2+y**2), z)
+    phi = np.arctan2(y, x)
+
+    if not radians:
+        theta = np.degrees(theta % (2*np.pi))
+        phi = np.degrees(phi % (2*np.pi))
+
+    result = np.array([r, theta, phi])
+
+    return result.T
 
 def SphVecToCart(position, vector, radians=False):
     """Convert a spherical vector into Cartesian vector space.
