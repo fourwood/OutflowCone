@@ -74,12 +74,15 @@ class Cone:
         self._cart_pts = oc.SphPosToCart(self._sph_pts, radians=True)
 
         if zero_z:
-            self._cart_pts[:,2] -= self.r_in * np.cos(theta_rad)
+            #self._cart_pts[:,2] -= self.r_in * np.cos(theta_rad)
+            self._cart_pts[:,2] -= self.r_in * \
+                    (self._local_zs / self._local_rs)
 
         # Coord system will be:
         #   -Z-axis is LOS, making X go right and Y go up (+Z out of the page)
         # Rot in -X for inc (or rotate -inc in +X) and in Z for PA
         self.positions = oc.Rot(self._cart_pts, x=-self.inc, z=self.PA)
+
         self.velocities = np.zeros_like(self.positions)
 
     def SetLocalVels(self, vels, radians=True):#, coordinates='spherical'):
@@ -101,6 +104,7 @@ class Cone:
                 None. self.velocities is set to the equivalent Cartesian
                 velocities with inclination accounted for.
         """
+        self._sph_vels = vels
         cart_vels = np.zeros_like(self._sph_pts)
         for i, pt in enumerate(self._sph_pts):
             cart_vels[i] = oc.SphVecToCart(pt, vels[i], radians=radians)
@@ -128,16 +132,17 @@ class Cone:
 
     # Properties for nicely slicing the 2D array of positions and velocities
     # into lists for each coordinate.
+    # TODO: Property for spherical-coord velocities.
     @property
-    def _rs(self):
+    def _local_rs(self):
         return self._sph_pts[:,0]
 
     @property
-    def _thetas(self):
+    def _local_thetas(self):
         return self._sph_pts[:,1]
 
     @property
-    def _phis(self):
+    def _local_phis(self):
         return self._sph_pts[:,2]
 
     @property
@@ -151,6 +156,18 @@ class Cone:
     @property
     def _zs(self):
         return self.positions[:,2]
+
+    @property
+    def _local_xs(self):
+        return self._cart_pts[:,0]
+
+    @property
+    def _local_ys(self):
+        return self._cart_pts[:,1]
+
+    @property
+    def _local_zs(self):
+        return self._cart_pts[:,2]
 
     @property
     def _vxs(self):
@@ -181,6 +198,18 @@ class Cone:
             self.velocities[:,2] = vzs
         else:
             raise Exception("Array is not the same length as self._vzs.")
+
+    @property
+    def _local_vrs(self):
+        return self._sph_vels[:,0]
+
+    @property
+    def _local_vthetas(self):
+        return self._sph_vels[:,1]
+
+    @property
+    def _local_vphis(self):
+        return self._sph_vels[:,2]
 
 if __name__ == "__main__":
     pass
