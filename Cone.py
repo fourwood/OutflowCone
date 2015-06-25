@@ -25,7 +25,8 @@ class Cone:
 
         self.positions = None
 
-    def GenerateClouds(self, n_clouds, bicone=False, falloff=1, zero_z=False):
+    def GenerateClouds(self, n_clouds, bicone=False, falloff=1,
+                       zero_z=False, flatten=False):
         """ Generate 'n' model clouds within the cone bounds.
 
             Arguments:
@@ -38,6 +39,7 @@ class Cone:
                             A value of 1/3 creates a constant-density profile.
                 zero_z  --  r_in makes the z-height of the base of the cone non-zero.
                             Should the clouds all get translated down? (e.g. z -= r_in)
+                flatten --  Keep the inner radius spherical? Or flatten it?
 
             Returns:
                 None. Creates "positions" member variable, containing Cartesian
@@ -73,10 +75,13 @@ class Cone:
         # Convert to Cartesian so we can rotate things around.
         self._cart_pts = oc.SphPosToCart(self._sph_pts, radians=True)
 
-        if zero_z:
-            #self._cart_pts[:,2] -= self.r_in * np.cos(theta_rad)
+        if flatten:
             self._cart_pts[:,2] -= self.r_in * \
                     (self._local_zs / self._local_rs)
+            if not zero_z:
+                self._cart_pts[:,2] += self.r_in
+        elif zero_z:
+            self._cart_pts[:,2] -= self.r_in * np.cos(theta_rad)
 
         # Coord system will be:
         #   -Z-axis is LOS, making X go right and Y go up (+Z out of the page)
