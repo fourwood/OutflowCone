@@ -111,8 +111,9 @@ class Cone:
         """
         self._sph_vels = vels
         cart_vels = np.zeros_like(self._sph_pts)
-        for i, pt in enumerate(self._sph_pts):
-            cart_vels[i] = oc.SphVecToCart(pt, vels[i], radians=radians)
+        cart_vels = oc.SphVecToCart(self._sph_pts, vels, radians=radians)
+        #for i, pt in enumerate(self._sph_pts):
+        #    cart_vels[i] = oc.SphVecToCart(pt, vels[i], radians=radians)
 
         cart_vels_rot = oc.Rot(cart_vels, x=-self.inc)
         self.velocities = cart_vels_rot

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 import numpy as np
+from numpy.core.umath_tests import matrix_multiply
+
+# TODO: Write unit tests for all of these helper functions.
 
 def SphPosToCart(vectors, radians=False):
     """Convert a spherical position vector into Cartesian position.
@@ -34,6 +37,9 @@ def SphPosToCart(vectors, radians=False):
     result = np.array([r * np.sin(theta) * np.cos(phi),
                        r * np.sin(theta) * np.sin(phi),
                        r * np.cos(theta)])
+
+    # Transpose only has an effect for arrays of vectors, but puts vectors into
+    # rows not columns, the way it should be.
     return result.T
 
 def CartPosToSph(vectors, radians=False):
@@ -72,47 +78,61 @@ def CartPosToSph(vectors, radians=False):
 
     result = np.array([r, theta, phi])
 
+    # Transpose only has an effect for arrays of vectors, but puts vectors into
+    # rows not columns, the way it should be.
     return result.T
 
 def SphVecToCart(position, vector, radians=False):
-    """Convert a spherical vector into Cartesian vector space.
+    """Convert spherical vectors into Cartesian vector space.
 
-    Takes a spherical-space vector and its corresponding spherical-
-    space position and returns the magnitude of the vector in x, y,
+    Takes spherical-space vectors and their corresponding spherical-
+    space positions and returns the magnitude of the vectors in x, y,
     and z Cartesian directions.
 
     Arguments:
-        position -- A 3-element NumPy array, representing the position
-                    of the vector in spherical space.
-        vector -- A 3-element NumPy array, representing the vector to
-                  be converted, also in spherical space.
+        position -- A 3-element NumPy array, or array of arrays, representing
+                    the position of the vector(s) in spherical space.
+        vector   -- A 3-element NumPy array, or array of arrays, representing
+                    the vector(s) to be converted, also in spherical space.
 
     Returns a 3-element NumPy array representing the magnitude of
     the input vector in Cartesian vector space.
     """
-    if len(position) != 3:
-        print("WARNING - SphVecToCart(): Position not a 3-dimensional vector!")
-    if len(vector) != 3:
-        print("WARNING - SphVecToCart(): Vector not a 3-dimensional vector!")
+    if len(position) != len(vector):
+        print("ERROR - SphVecToCart(): \
+                Vector and position arrays must have the same length! Aborting.")
+        return
 
-    r, theta, phi = position
+    if position.ndim == 1 and vector.ndim == 1:
+        if len(position) == 3:
+            r, theta, phi = position
+        else:
+            print("ERROR - SphVecToCart(): \
+                    Vectors and positions must each have three elements! Aborting.")
+            return
+
+    elif position.ndim == 2 and vector.ndim == 2:
+        # Maybe an error-checking thing for 3-element vectors like above?
+        r, theta, phi = position[:,[0,1,2]].T
+    else:
+        print("ERROR - SphVecToCart(): \
+                Vector and position arrays must have the same dimensions, or must \
+                be either 1D or 2D arrays! Aborting.")
+        return
+
     if not radians:
         theta = np.radians(theta % 360)
         phi = np.radians(phi % 360)
 
-    r_hat = np.array([np.sin(theta) * np.cos(phi), #x_hat
-                      np.sin(theta) * np.sin(phi), #y_hat
-                      np.cos(theta)])              #z_hat
+    # Calculating x-hat, y-hat, and z-hat from r-hat, theta-hat, and phi-hat
+    transform_matrix = np.array([
+        [np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)],
+        [np.cos(theta) * np.cos(phi), np.cos(theta) * np.sin(phi),-np.sin(theta)],
+        [-np.sin(phi), np.cos(phi), np.zeros_like(theta)]
+        ])
 
-    theta_hat = np.array([np.cos(theta) * np.cos(phi), #x_hat
-                          np.cos(theta) * np.sin(phi), #y_hat
-                          -np.sin(theta)])             #z_hat
-
-    phi_hat = np.array([-np.sin(phi),   #x_hat
-                          np.cos(phi),  #y_hat
-                                    0]) #z_hat
-    transform_matrix = np.array([r_hat, theta_hat, phi_hat])
-    return vector.dot(transform_matrix)
+    # Do the dot products!
+    return np.squeeze(matrix_multiply(transform_matrix.T, vector[...,None]))
 
 def RotX(vector, angle, radians=False):
     """Rotate a Cartesian vector by a given angle about the +x axis.
@@ -273,6 +293,8 @@ def CartPosToCyl(vector):
 
 def CylVecToCart(position, vector):
     """Convert a cylindrical vector into Cartesian vector space.
+
+    N.B.: Not optimized!  See SphVecToCart() for a better way to do this.
 
     Takes a cylindrical-space vector and its corresponding cylindrical-
     space position and returns the magnitude of the vector in x, y,
