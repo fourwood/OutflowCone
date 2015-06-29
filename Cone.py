@@ -136,6 +136,17 @@ class Cone:
         """
         return np.asarray([v.dot(LOS) for v in self.velocities])
 
+    def GetLOSCloudVels(self, coord, dx, dy=None):
+        """ Returns an array of all the projected velocities along a line of sight.
+        """
+        dy = dx if dy is None else dy
+
+        x, y = coord
+        x_mask = (self._xs > x) & (self._xs < x+dx)
+        y_mask = (self._ys > y) & (self._ys < y+dy)
+        mask = x_mask & y_mask
+        return self.LOS_vs[mask]
+
     # Properties for nicely slicing the 2D array of positions and velocities
     # into lists for each coordinate.
     # TODO: Property for spherical-coord velocities.
@@ -204,6 +215,10 @@ class Cone:
             self.velocities[:,2] = vzs
         else:
             raise Exception("Array is not the same length as self._vzs.")
+
+    @property
+    def LOS_vs(self):
+        return -self._vzs
 
     @property
     def _local_vrs(self):
