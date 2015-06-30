@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import OutflowCone as oc
 import numpy as np
+import numpy.ma as ma
 
 class Cone:
     """ Galactic wind outflow cone model.
@@ -145,7 +146,7 @@ class Cone:
         x_mask = (self._xs > x) & (self._xs < x+dx)
         y_mask = (self._ys > y) & (self._ys < y+dy)
         mask = x_mask & y_mask
-        return self.LOS_vs[mask]
+        return ma.array(self.LOS_vs, mask=~mask)
 
     # Properties for nicely slicing the 2D array of positions and velocities
     # into lists for each coordinate.

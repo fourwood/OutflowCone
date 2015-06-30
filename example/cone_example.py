@@ -82,17 +82,15 @@ total_broadening = np.sqrt(inst_res**2 + turb_sigma**2)
 
 for j, y in enumerate(sky_ys):
     for i, x in enumerate(sky_xs):
-        x_mask = (cone._xs > x) & (cone._xs < x+step)
-        y_mask = (cone._ys > y) & (cone._ys < y+step)
-        bin_mask = x_mask & y_mask
-        bin_vels = proj_vels[bin_mask]
-        #bin_vels = cone.GetLOSCloudVels((x, y), step)
-        bin_weights = weights[bin_mask]
-        bin_radii = radii[bin_mask]
+        masked_vels = cone.GetLOSCloudVels((x, y), step)
+        mask = ~masked_vels.mask # foo is a masked array, we want what *isn't* masked, really.
+        bin_vels = masked_vels[mask]
+        bin_weights = weights[mask]
+        bin_radii = radii[mask]
 
         if len(bin_vels) > 0:
             v_min, v_max = (-500., 500.) # Enough to encompass everything...
-            bin_size = 5.
+            bin_size = 5.                # but probably shouldn't be hard-coded.
             hist_bins = np.linspace(v_min, v_max, (v_max-v_min)/bin_size+1)
             n, edges = np.histogram(bin_vels, bins=hist_bins, weights=bin_weights)
 
@@ -147,6 +145,7 @@ params = {'figure.subplot.left':    0.10,
           'figure.subplot.right':   0.93,
           'figure.subplot.bottom':  0.12,
           'figure.subplot.top':     0.97,
+          'text.usetex':            True,
           'font.size':              10}
 plt.rcParams.update(params)
 figsize = (3.35, 2.75)
