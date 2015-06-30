@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-from numpy.core.umath_tests import matrix_multiply
+from numpy.core.umath_tests import matrix_multiply as _matrix_multiply
 
 # TODO: Write unit tests for all of these helper functions.
 
@@ -44,6 +44,7 @@ def SphPosToCart(vectors, radians=False):
 
 def CartPosToSph(vectors, radians=False):
     """Convert a Cartesian position vector into spherical coordinate space.
+    NOTE: Largely untested...
 
     Arguments:
         vectors -- A 3-element NumPy array representing, in order,
@@ -132,10 +133,12 @@ def SphVecToCart(position, vector, radians=False):
         ])
 
     # Do the dot products!
-    return np.squeeze(matrix_multiply(transform_matrix.T, vector[...,None]))
+    return np.squeeze(_matrix_multiply(transform_matrix.T, vector[...,None]))
 
 def RotX(vector, angle, radians=False):
     """Rotate a Cartesian vector by a given angle about the +x axis.
+    NOTE: Probably needs to be re-written (to be like Rot()) for accepting
+    arrays of vectors.
 
     This function rotates a given vector about the Cartesian +x axis.
     The rotation is in a right-handed sense; positive angles rotate
@@ -157,6 +160,8 @@ def RotX(vector, angle, radians=False):
 
 def RotY(vector, angle, radians=False):
     """Rotate a Cartesian vector by a given angle about the +y axis.
+    NOTE: Probably needs to be re-written (to be like Rot()) for accepting
+    arrays of vectors.
 
     This function rotates a given vector about the Cartesian +y axis.
     The rotation is in a right-handed sense; positive angles rotate
@@ -181,6 +186,8 @@ def RotY(vector, angle, radians=False):
 
 def RotZ(vector, angle, radians=False):
     """Rotate a Cartesian vector by a given angle about the +z axis.
+    NOTE: Probably needs to be re-written (to be like Rot()) for accepting
+    arrays of vectors.
 
     This function rotates a given vector about the Cartesian +z axis.
     The rotation is in a right-handed sense; positive angles rotate
@@ -204,18 +211,20 @@ def RotZ(vector, angle, radians=False):
     return R_Z.dot(vector)
 
 def Rot(vectors, x=0., y=0., z=0., radians=False):
-    """Rotate a Cartesian vector.
+    """Rotate Cartesian vectors.
 
-    This function rotates a given vector about the Cartesian axes.
-    The rotation is in a right-handed sense; positive angles rotate
-    from the +x axis toward the +y axis.
+    This function rotates input vectors about the Cartesian axes.
+    The rotation is in a right-handed sense.
 
     Arguments:
-        vector -- A NumPy array of vectors to be rotated.
-        angle -- The angle by which the input vectors will be rotated.
+        vector  --  A NumPy array of vectors to be rotated.
 
     Keywords:
-        radians -- Whether 'angle' is in radians (True) or degrees (False; default).
+        x       --  The angle to rotate about the x-axis.
+        y       --  The angle to rotate about the y-axis.
+        z       --  The angle to rotate about the z-axis.
+        radians --  Whether the above angles are given in radians (True)
+                    or degrees (False; default).
 
     Returns a NumPy array representing the rotated vectors.
     """
@@ -256,6 +265,7 @@ def Rot(vectors, x=0., y=0., z=0., radians=False):
 
 def CylPosToCart(vector):
     """Convert a cylindrical position vector into Cartesian position.
+    NOTE: Haven't really used this, so it might not be great.
 
     Arguments:
         vector -- A 3-element NumPy array representing, in order,
@@ -274,6 +284,7 @@ def CylPosToCart(vector):
 
 def CartPosToCyl(vector):
     """Convert a Cartesian position vector into cylindrical coordinates.
+    NOTE: Haven't really used this, so it might not be great.
 
     Arguments:
         vector -- A 3-element NumPy array representing, in order,
@@ -346,6 +357,7 @@ def RotCurve(vel, radius, C=0.3, p=1.35):
                   values expected to be between 1 and 1.5 for disks.
 
     Returns the value of the rotation curve at the given radius.
+    See Bertola et al. 1991, ApJ, 373, 369 for more information.
     """
     C_ = C # kpc
     p_ = p

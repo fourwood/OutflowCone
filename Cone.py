@@ -124,7 +124,7 @@ class Cone:
             NOTE:   UNTESTED!  So far I do a lot of assuming that -z is the LOS,
                     but maybe this still works okay.
             NOTE2:  If you just want it projected into a Cartesian axis,
-                    use self._vxs/_vys/_vzs to avoid all the dot products.
+                    use self._vxs, ._vys, and ._vzs to avoid all the dot products.
 
             Arguments:
                 LOS --  3-element NumPy array representing the LOS vector.
@@ -139,6 +139,20 @@ class Cone:
 
     def GetLOSCloudVels(self, coord, dx, dy=None):
         """ Returns an array of all the projected velocities along a line of sight.
+
+            Arguments:
+                coord   --  x/y (~RA/dec) coordinate pair, in projected kpc,
+                            of the requested line-of-sight.
+                dx      --  Full width of the x-direction spatial bin, in kpc.
+
+            Keywords:
+                dy      --  Optional. Full width of hte y-direction spatial bin,
+                            in kpc. If None/omitted, then dy = dx is assumed.
+
+            Returns:
+                NumPy masked array containing all LOS velocities, with velocities for
+                clouds located inside the requested LOS bin *not* masked (i.e. set
+                to *False* in return.mask).
         """
         dy = dx if dy is None else dy
 
@@ -219,6 +233,9 @@ class Cone:
 
     @property
     def LOS_vs(self):
+        """ Returns the line-of-sight velocities of all clouds.
+            NOTE: Line-of-sight is assumed to be along the -z axis.
+        """
         return -self._vzs
 
     @property
