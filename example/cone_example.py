@@ -17,6 +17,12 @@ PA = 90
 theta = 60
 r_in = 0.5
 r_out = 6.0
+
+# Makes sure the bottom of the cone is at the midplane:
+zero_z = True
+# Makes the bottom of the cone flat, rather than a sector of a spherical surface:
+flatten = True
+
 vel_vec = np.array([30., 0, 225.])
 # Rotation curve paramters
 C, p = (0.5, 1.35)
@@ -48,7 +54,7 @@ cone = oc.Cone(inc=inc, PA=PA, theta=theta, r_in=r_in, r_out=r_out)
 # 'flatten' means make it so the cone is flat on the bottom at a disk height of r_in;
 # otherwise it'll be a spherical surface of radius r_in. If zero_z is true, the minimum
 # z-height of the cone will be 0, otherwise it'll be some non-zero value based on r_in.
-cone.GenerateClouds(n_points, flatten=True, zero_z=True)
+cone.GenerateClouds(n_points, flatten=flatten, zero_z=zero_z)
 
 # Make a rotation curve for each point.
 sph_vels = np.repeat(np.asarray([vel_vec]), cone._n_clouds, axis=0)
